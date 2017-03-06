@@ -1,73 +1,41 @@
-SCR#:2161.0
-Title: Implicit SPH (ISPH) v. 1.0
-Type: Open Source Software
+Implicit SPH (ISPH) v. 1.0
+==========================
 
-The Department of Energy (DOE), by memo dated 11/9/2016, has granted 
-Sandia permission to assert its copyright in software entitled 
-" Implicit SPH (ISPH) v. 1.0 ".
+Implicit SPH (ISPH) solves multi-physics meso-
+scale flow problems and is a derivative version
+of LAMMPS (http://lammps.sandia.gov).  Copyright
+2016 Sandia National Laboratories.  ISPH is a 
+copyrighted code that is distributed free-of-charge,
+under the terms of the GNU Public License (GPL).  
+You can redistribute it and/or modify it under the
+terms of the GNU General Public License as published 
+by the Free Software Foundation, either version 3 of 
+the License, or at your option) any later version.  
+This program is distributed in the hope that it will 
+be useful, but WITHOUT ANY WARRANTY; without even 
+the implied warranty of MERCHANTABILITY or FITNESS 
+FOR A PARTICULAR PURPOSE.  
 
-In accordance with the DOE's permission:
-All copies of "Implicit SPH (ISPH) v. 1.0" that are released under 
-an Open Source Software (OSS) license should be marked:
+See the GNU General Public License for more details.  
+You should have received a copy of the GNU General 
+Public License along with this program.  
 
-“Copyright (year first published) Sandia Corporation. Under the terms
-of Contract DE-AC04-94AL85000 with Sandia Corporation, the U.S. 
-Government retains certain rights in this software.”
-
-The above notice should appear before the OSS license, and the above 
-notice and the OSS license are the ONLY terms that should appear in
-the software or the associated web site. No other disclaimers or 
-notices should be used.
-________________________________________
-The primary vehicle for distribution of "Implicit SPH (ISPH) v. 1.0" 
-should be the OSS license and associated web site. However, if  
-"Implicit SPH (ISPH) v. 1.0" is to be released under a different 
-(non-OSS) type of license it should be marked:
-
-“Copyright (year first published) Sandia Corporation. Under the 
-terms of Contract DE-AC04-94AL85000, there is a non-exclusive 
-license for use of this work by or on behalf of the U.S. Government. 
-Export of this program may require a license from the United 
-States Government.”
-
-At a minimum, this copyright notice should be on the package 
-containing the program. Preferably, the copyright notice 
-should also be incorporated into the source code and be displayed 
-on at least the first screen that comes up when the software 
-is run. In addition, the following complete language should 
-also be included in the copyright notice:
-
-                                                 NOTICE:
-
-For five (5) years from 11/9/2016 the United States Government is
-granted for itself and others acting on its behalf a paid-up, 
-nonexclusive, irrevocable worldwide license in this data to reproduce, 
-prepare derivative works, and perform publicly and display publicly, 
-by or on behalf of the Government. There is provision for the 
-possible extension of the term of this license. Subsequent to that 
-period or any extension granted, the United States Government is 
-granted for itself and others acting on its behalf a paid-up, nonexclusive, 
-irrevocable worldwide license in this data to reproduce, prepare 
-derivative works, distribute copies to the public, perform publicly and 
-display publicly, and to permit others to do so. The specific term of 
-the license can be identified by inquiry made to Sandia Corporation or DOE.
+If not, see http://www.gnu.org/licenses/.”
  
-NEITHER THE UNITED STATES GOVERNMENT, NOR THE UNITED STATES DEPARTMENT OF ENERGY, 
-NOR SANDIA CORPORATION, NOR ANY OF THEIR EMPLOYEES, MAKES ANY WARRANTY, 
-EXPRESS OR IMPLIED, OR ASSUMES ANY LEGAL RESPONSIBILITY FOR THE ACCURACY, 
-COMPLETENESS, OR USEFULNESS OF ANY INFORMATION, APPARATUS, PRODUCT, OR 
-PROCESS DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
- 
-Any licensee of this software has the obligation and responsibility to 
-abide by the applicable export control laws, regulations, and general 
-prohibitions relating to the export of technical data. Failure to 
-obtain an export control license or other authority from the Government 
-may result in criminal liability under U.S. laws.
- 
-                                             (End of Notice)
+Below is a summary of what the GPL means for ISPH users:
 
-This alternate language should only be used if the software is to be distributed
-under a different (non-OSS) type of license. If there is any question at all as 
-to which notice is appropriate, please contact Jamie Garner at (505) 845-0524.  
-For non-OSS distribution, please contact Licensing and IP Management in New Mexico 
-or Business Development (BuDS) in California for guidance
+(1) Anyone is free to use, modify, or extend ISPH in 
+any way they choose, including for commercial purposes.
+
+(2) If you distribute a modified version of ISPH, it 
+must remain open-source, meaning you distribute it under 
+the terms of the GPL. You should clearly annotate such 
+a code as a derivative version of ISPH.
+
+(3) If you release any code that includes ISPH source 
+code, then it must also be open-sourced, meaning you 
+distribute it under the terms of the GPL.
+
+(4) If you give ISPH files to someone else, the GPL 
+LICENSE file and source file headers (including the
+copyright and GPL notices) should remain part of the code.

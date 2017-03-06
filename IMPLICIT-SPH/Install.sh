@@ -162,6 +162,7 @@ myfiles="
 "
 
 if (test $1 = 1) then
+    cp -f make-mine/* ../MAKE/MINE
     for file in $myfiles; do cp -p $file .. ; done
 elif (test $1 = 0) then
     for file in $myfiles; do rm -f ../$file ; done
