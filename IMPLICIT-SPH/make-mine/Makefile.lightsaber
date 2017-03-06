@@ -1,0 +1,144 @@
+# parks = MPICH, no FFTs, Trilinos
+
+SHELL = /bin/sh
+
+# Include the Trilinos export makefiles from needed packages
+TRILINOS_INSTALL_DIR = /home/csiefer/Trilinos/sandbox3/build/install_ia64
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Epetra
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Teuchos
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Belos
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.ML
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Ifpack
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Amesos
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Zoltan
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Pamgen
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.NOX
+
+# Add the Trilinos installation directory to the search paths
+# for libraries and headers
+LIB_PATH = $(TRILINOS_INSTALL_DIR)/lib
+
+INCLUDES = -I. -I$(TRILINOS_INSTALL_DIR)/include $(Teuchos_TPL_INCLUDE_DIRS) $(Ifpack_TPL_INCLUDE_DIRS)
+
+# Add the Trilinos libraries, search path, and rpath to the
+# linker command line arguments
+LIBS =  $(Epetra_SHARED_LIB_RPATH_COMMAND) \
+        $(Epetra_LIBRARIES) \
+        $(Teuchos_LIBRARIES) \
+        $(ML_LIBRARIES) \
+        $(Belos_LIBRARIES) \
+	$(Amesos_LIBRARIES) \
+        $(Ifpack_LIBRARIES) \
+        $(NOX_LIBRARIES) \
+        $(Zoltan_LIBRARIES) \
+        $(Pamgen_LIBRARIES) \
+        $(Ifpack_TPL_LIBRARIES) \
+        $(Epetra_TPL_LIBRARIES) \
+        $(Epetra_EXTRA_LD_FLAGS)
+
+SHELL = /bin/sh
+
+# ---------------------------------------------------------------------
+# compiler/linker settings
+# specify flags and libraries needed for your compiler
+
+CC =		mpicxx
+CCFLAGS =	-g -O3 -DFFT_NONE -DMPICH_IGNORE_CXX_SEEK -Wall -std=c++0x $(INCLUDES)
+SHFLAGS =	-fPIC
+DEPFLAGS =	-M
+
+LINK =		mpicxx
+LINKFLAGS =	-g -O3 -Wall -L$(LIB_PATH)
+LIB = 	  	$(LIBS)
+SIZE =		size
+
+ARCHIVE =	ar
+ARFLAGS =	-rc
+SHLIBFLAGS =	-shared
+
+# ---------------------------------------------------------------------
+# LAMMPS-specific settings
+# specify settings for LAMMPS features you will use
+# if you change any -D setting, do full re-compile after "make clean"
+
+# LAMMPS ifdef settings, OPTIONAL
+# see possible settings in doc/Section_start.html#2_2 (step 4)
+
+LMP_INC =	
+
+# MPI library, REQUIRED
+# see discussion in doc/Section_start.html#2_2 (step 5)
+# can point to dummy MPI library in src/STUBS as in Makefile.serial
+# INC = path for mpi.h, MPI compiler settings
+# PATH = path for MPI library
+# LIB = name of MPI library
+
+#MPI_INC =       -DMPICH_SKIP_MPICXX
+#MPI_PATH = 
+#MPI_LIB =	-lmpich -lmpl -lpthread
+
+# FFT library, OPTIONAL
+# see discussion in doc/Section_start.html#2_2 (step 6)
+# can be left blank to use provided KISS FFT library
+# INC = -DFFT setting, e.g. -DFFT_FFTW, FFT compiler settings
+# PATH = path for FFT library
+# LIB = name of FFT library
+
+#FFT_INC =    	-DFFT_FFTW
+#FFT_PATH = 
+#FFT_LIB =	-lfftw
+
+# JPEG library, OPTIONAL
+# see discussion in doc/Section_start.html#2_2 (step 7)
+# only needed if -DLAMMPS_JPEG listed with LMP_INC
+# INC = path for jpeglib.h
+# PATH = path for JPEG library
+# LIB = name of JPEG library
+
+JPG_INC =       
+JPG_PATH = 	
+#JPG_LIB =	-ljpeg
+
+# ---------------------------------------------------------------------
+# build rules and dependencies
+# no need to edit this section
+
+include	Makefile.package.settings
+include	Makefile.package
+
+EXTRA_INC = $(LMP_INC) $(PKG_INC) $(MPI_INC) $(FFT_INC) $(JPG_INC) $(PKG_SYSINC)
+EXTRA_PATH = $(PKG_PATH) $(MPI_PATH) $(FFT_PATH) $(JPG_PATH) $(PKG_SYSPATH)
+EXTRA_LIB = $(PKG_LIB) $(MPI_LIB) $(FFT_LIB) $(JPG_LIB) $(PKG_SYSLIB)
+
+# Path to src files
+
+vpath %.cpp ..
+vpath %.h ..
+
+# Link target
+
+$(EXE):	$(OBJ)
+	$(LINK) $(LINKFLAGS) $(EXTRA_PATH) $(OBJ) $(EXTRA_LIB) $(LIB) -o $(EXE)
+	$(SIZE) $(EXE)
+
+# Library targets
+
+lib:	$(OBJ)
+	$(ARCHIVE) $(ARFLAGS) $(EXE) $(OBJ)
+
+shlib:	$(OBJ)
+	$(CC) $(CCFLAGS) $(SHFLAGS) $(SHLIBFLAGS) $(EXTRA_PATH) -o $(EXE) \
+        $(OBJ) $(EXTRA_LIB) $(LIB)
+
+# Compilation rules
+
+%.o:%.cpp
+	$(CC) $(CCFLAGS) $(SHFLAGS) $(EXTRA_INC) -c $<
+
+%.d:%.cpp
+	$(CC) $(CCFLAGS) $(EXTRA_INC) $(DEPFLAGS) $< > $@
+
+# Individual dependencies
+
+DEPENDS = $(OBJ:.o=.d)
+include $(DEPENDS)

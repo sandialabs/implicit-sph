@@ -1,0 +1,274 @@
+Wendland Kernel h = 1.2dx, cut over h = 2.0;
+============================================
+
+MorrisHolmes
+============
+
+N = 32
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 192
+                total volume         = 7.367736289630282e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.165346849657311e-01
+                err.psi.norm2        = 9.116361684603088e-03
+                relative error       = 4.210116123449621e-02
+===================================================
+
+N = 64
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 832
+                total volume         = 7.981714313766128e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.218003136662599e-01
+                err.psi.norm2        = 2.472541432093094e-03
+                relative error       = 1.114760115178870e-02
+===================================================
+
+N = 128
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 3328
+                total volume         = 7.981714313766139e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.231527086946378e-01
+                err.psi.norm2        = 5.863480602005782e-04
+                relative error       = 2.627564162812547e-03
+===================================================
+N = 256
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 13056
+                total volume         = 7.828219807732187e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.234931262500010e-01
+                err.psi.norm2        = 1.195355546999731e-04
+                relative error       = 5.348511460091163e-04
+===================================================
+N = 512
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 52224
+                total volume         = 7.828219807731736e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.235783766869223e-01
+                err.psi.norm2        = 1.987690665049806e-05
+                relative error       = 8.890352879845695e-05
+===================================================
+N = 1024
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 209920
+                total volume         = 7.866593434240047e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.235996984418538e-01
+                err.psi.norm2        = 9.546730590972311e-06
+                relative error       = 4.269563267526007e-05
+===================================================
+N = 2048
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 839680
+                total volume         = 7.866593434239324e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.236050294524704e-01
+                err.psi.norm2        = 6.855771238118953e-06
+                relative error       = 3.066018351602516e-05    
+===================================================
+N = 4096
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 3354624
+                total volume         = 7.857000027641470e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.236063622408705e-01
+                err.psi.norm2        = 4.046678426104591e-06
+                relative error       = 1.809733133507837e-05
+===================================================
+
+
+err = [4.210116123449621e-02
+1.114760115178870e-02
+2.627564162812547e-03
+5.348511460091163e-04
+8.890352879845695e-05
+4.269563267526007e-05  
+3.066018351602516e-05
+1.809733133507837e-05];
+
+rate = [ 1.9171
+2.0849
+2.2965
+2.5888
+1.0582
+0.47772
+0.76059];
+
+
+ConstExtension
+==============
+
+N = 32
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 192
+                total volume         = 7.367736289630282e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.165346849657311e-01
+                err.psi.norm2        = 5.759847249691673e-02
+                relative error       = 2.660011374437878e-01
+===================================================
+N = 64
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 832
+                total volume         = 7.981714313766156e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.218003136662599e-01
+                err.psi.norm2        = 3.251980384017656e-02
+                relative error       = 1.466174835492284e-01
+===================================================
+N = 128
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 3328
+                total volume         = 7.981714313765687e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.231527086946378e-01
+                err.psi.norm2        = 1.714795402048308e-02
+                relative error       = 7.684403259450612e-02
+===================================================
+N = 256
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 13056
+                total volume         = 7.828219807731736e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.234931262500011e-01
+                err.psi.norm2        = 8.787732471152979e-03
+                relative error       = 3.931992280300806e-02
+===================================================
+N = 512
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 52224
+                total volume         = 7.828219807731559e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.235783766869217e-01
+                err.psi.norm2        = 4.446103833363708e-03
+                relative error       = 1.988610839405823e-02
+===================================================
+N = 1024
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 209920
+                total volume         = 7.866593434239324e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.235996984418531e-01
+                err.psi.norm2        = 2.235951447734743e-03
+                relative error       = 9.999796347293378e-03
+===================================================
+N = 2048
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 839680
+                total volume         = 7.866593434253605e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.236050294524692e-01
+                err.psi.norm2        = 1.121180046789608e-03
+                relative error       = 5.014109251187179e-03
+===================================================
+N = 4096
+
+FixISPH_Error:: analytic solution is known for Poisson Boltzmann
+                error is computed against the analytic solution
+                total # of particles = 3354624
+                total volume         = 7.857000027641470e-01
+
+                note: if MLS is used total volume is same as the total
+                number of particles
+
+                sol.psi.norm2        = 2.236063622408705e-01
+                err.psi.norm2        = 5.613884991342362e-04
+                relative error       = 2.510610581507086e-03
+===================================================
+
+
+err = [2.660011374437878e-01
+1.466174835492284e-01
+7.684403259450612e-02
+3.931992280300806e-02
+1.988610839405823e-02
+9.999796347293378e-03
+5.014109251187179e-03
+2.510610581507086e-03];
+
+rate =[0.85938
+0.93205
+0.96667
+0.98350
+0.99179
+0.99591
+0.99796];
+

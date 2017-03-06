@@ -1,0 +1,182 @@
+dimension          3
+
+# 1) Initialization
+# -----------------
+# set parameters that need to be defined before atoms are created or read-in from a file.
+# e.g., units, dimension, newton, processors, boundary, atom_style, atom_modify.
+
+# problem geometry
+variable           ltmp equal 10
+
+# discretization 
+variable           N equal 64
+variable           dx equal ${ltmp}/${N}
+
+variable           lx_over_tmp equal 0.80
+variable           ly_over_tmp equal 0.73
+variable           lz_over_tmp equal 0.75
+
+# smoothing length
+variable           h   equal 1.2*${dx}
+variable           cut equal 5*${dx} 
+
+variable           lx equal round(${lx_over_tmp}*${ltmp}/${dx})*${dx}
+variable           ly equal round(${ly_over_tmp}*${ltmp}/${dx})*${dx}
+variable           lz equal round(${lz_over_tmp}*${ltmp}/${dx})*${dx}
+
+# box domain
+variable           xmin equal  0.0
+variable           xmax equal  ${lx}
+variable           ymin equal  0.0
+variable           ymax equal  ${ly}
+variable           zmin equal  -${cut}
+variable           zmax equal  ${lz}+${cut}
+
+# flow parameters
+# flow parameters                                                                                                     
+variable           Umax equal 10e8
+                                                                                                                      
+variable           tstep equal 0.08*${dx}/${Umax}                                                                       
+variable           tfinal equal 2e-8                                                                                
+variable           nrun equal ${tfinal}/${tstep}   
+#variable           nrun equal 1
+
+# boundary and timestep
+newton             off
+units              si
+boundary           p p p
+
+# skin setup; not really used
+variable           delay equal 0
+
+# atom
+atom_style         isph
+
+print              "----------------"
+print              "N = ${N}"
+print              "dx = ${dx}"
+print              "h = ${h}"
+print              "nrun = ${nrun}"
+print              "----------------"  
+
+# 2) Atom definition
+# ------------------
+# 1. There are 3 ways to define atoms in LAMMPS. 
+# - read them in from a data or 
+# - restart file via the read_data or 
+# - read_restart commands. 
+# These files can contain molecular topology information. 
+#
+# Or create atoms on a lattice (with no molecular topology). 
+# e.g., lattice, region, create_box, create_atoms. 
+# The entire set of atoms can be duplicated to make a larger simulation using the replicate command. 
+
+#lattice            sq2 ${dx} origin 0.5 0.5 0.
+lattice            bcc ${dx} 
+
+#region            name   block       xlo      xhi        ylo       yhi        zlo       zhi units box
+region             box    block ${xmin} ${xmax} ${ymin} ${ymax}  ${zmin} ${zmax} units box
+
+create_box         3 box
+create_atoms       1 region box
+
+# 3) Settings
+# -----------
+# Once atoms and molecular topology are defined, a variety of settings can be specified: 
+# force field coefficients, simulation parameters, output options, etc.
+#
+# Force field coefficients are set by these commands (they can also be set in the read-in files): 
+# pair_coeff, bond_coeff, angle_coeff, dihedral_coeff, improper_coeff, kspace_style, 
+# dielectric, special_bonds.
+#
+# Various simulation parameters are set by these commands: 
+# neighbor, neigh_modify, group, timestep, reset_timestep, run_style, min_style, min_modify.
+#
+# Fixes impose a variety of boundary conditions, time integration, and diagnostic options. 
+# The fix command comes in many flavors.
+#
+# Various computations can be specified for execution during a simulation using the compute, 
+# compute_modify, and variable commands.
+#
+# Output options are set by the thermo, dump, and restart commands. 
+
+neighbor           0.0 bin
+neigh_modify       every 1 delay ${delay} check yes
+
+pair_style         isph/corrected
+pair_coeff         * * flow-charged-pore.xml ${h} 
+
+# adjust timestep maintaining cfl number
+fix                1 all isph
+fix                2 all isph/shift 0.02 
+
+variable           zbuftop equal ${lz}
+variable           zbufbottom equal 0
+
+fix                3 all isph/modify/type 1 2 ${xmin} ${xmax} ${ymin} ${ymax} ${zmin} ${zbufbottom}    
+fix                4 all isph/modify/type 2 1 ${xmin} ${xmax} ${ymin} ${ymax} ${zbufbottom} ${zbuftop}    
+fix                5 all isph/modify/type 1 2 ${xmin} ${xmax} ${ymin} ${ymax} ${zbuftop} ${zmax}    
+
+variable           eapp equal 1.0e6
+fix                10 all isph/modify/phi null 0.0 0.0 ${eapp}
+
+compute            geom all isph/sphere/porous 3 modpartlist-scaled.dat
+
+group              dummy type 0
+delete_atoms       group dummy
+
+# 4) Run a simulation
+# -------------------
+# A molecular dynamics simulation is run using the run command. 
+# Energy minimization (molecular statics) is performed using the minimize command. 
+# A parallel tempering (replica-exchange) simulation can be run using the temper command. 
+
+group              solid type 3
+
+variable           var_buf_z_top    atom (z>${zbuftop})
+variable           var_buf_z_bottom atom (z<${zbufbottom})
+
+group              buf_z_top    variable var_buf_z_top
+group              buf_z_bottom variable var_buf_z_bottom
+group              buf union buf_z_top buf_z_bottom
+
+group              fluid subtract all buf solid
+
+set                group fluid type 1
+set                group buf   type 2
+
+# dielectricity and viscosity on solid does not affect 
+set                group all isph_dielectric 6.95e-10
+set                group all isph_viscosity 1.0e10
+
+set                group fluid isph_density 1.0e-21
+set                group fluid isph_conductivity 1.0
+
+set                group buf   isph_density 1.0e-21
+set                group buf   isph_conductivity 1.0
+
+# insulator
+set                group solid isph_conductivity 0.0
+
+# heterogeneous material; since it is laplace equation, the ratio only matters.
+#set                group solid isph_conductivity 0.01
+
+set                group solid isph_density 1.0e-18
+
+variable           scapsi equal (4.142e-21/1.6e-19)
+variable           psi0 equal (-50e-3/${scapsi})
+set                group solid isph_electric_potential_on_wall ${psi0}
+
+#
+velocity           all set 0.0 0.0 0.0 units box
+
+#
+timestep           ${tstep} 
+
+#
+variable           dumpfreq equal 10
+
+dump               dump all custom ${dumpfreq} flow-charged-pore-3d.dump id type x y z  type phi phigradx phigrady phigradz psi psigradx psigrady psigradz vx vy vz pressure
+dump_modify        dump flush yes    
+
+run                ${nrun}

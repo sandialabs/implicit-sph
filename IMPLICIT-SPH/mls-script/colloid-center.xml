@@ -1,0 +1,26 @@
+<ParameterList name="Implicit SPH Top-Level Parameters: Colloid located at center 2D/3D">
+  <ParameterList name="Kernel Function">
+    <Parameter name="cut over h" type="double" value="1.0"/>
+    <Parameter name="MLS Order" type="int" value="2"/>
+  </ParameterList>
+  <ParameterList name="Physics Configuration">
+    <Parameter name="Incompressible Navier Stokes" type="string" value="Enabled"/>          
+  </ParameterList> 
+  <ParameterList name="Particle Information">
+    <Parameter name="type:1" type="string" value="fluid"/>
+    <Parameter name="type:2" type="string" value="boundary"/>
+  </ParameterList>
+  <ParameterList name="Incompressible Navier Stokes">
+    <Parameter name="Singular Poisson" type="string" value="NullSpace"/> 
+    <Parameter name="Arbitrary Lagrangian Eulerian" type="string" value="Enabled"/> 
+    <Parameter name="order" type="int"    value="2"/>
+    <Parameter name="g.x"   type="double" value="0.0"/>
+    <Parameter name="g.y"   type="double" value="-9.8"/>
+    <Parameter name="g.z"   type="double" value="0.0"/>
+    <ParameterList name="CCompact Poisson">
+      <Parameter name="tau:interior" type="double" value="0.00"/>
+      <Parameter name="tau:boundary" type="double" value="0.00"/>
+    </ParameterList>
+  </ParameterList>
+</ParameterList>
+  

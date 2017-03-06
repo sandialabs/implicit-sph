@@ -1,0 +1,154 @@
+dimension          2
+
+# 1) Initialization
+# -----------------
+# set parameters that need to be defined before atoms are created or read-in from a file.
+# e.g., units, dimension, newton, processors, boundary, atom_style, atom_modify.
+
+# geometry
+variable           N equal 128
+variable           r equal 1.0
+variable           l equal 0.2
+
+variable           Nx equal round(${N}*(${l}/${r}))
+variable           Ny equal ${N}
+
+variable           len equal ${Nx}*${r}/${N}
+
+variable           dx equal 2*${r}/${Ny}
+variable           wall equal 6*${dx}
+
+# box domain
+variable           xmin equal -${len}
+variable           xmax equal  ${len}
+variable           ymin equal -${r}-${wall}
+variable           ymax equal  ${r}+${wall}
+variable           zmin equal -${dx}/2.0
+variable           zmax equal  ${dx}/2.0
+
+variable           halfdx equal ${dx}/2.0
+
+# smoothing length
+variable           h    equal 1.5*${dx}
+variable           hmin equal 0.75*${dx}
+variable           cut  equal 2.0*${h}
+
+# flow parameters
+variable           nrun equal 1
+
+# boundary and timestep
+newton             off
+units              si
+boundary           p p p
+
+# skin setup; not really used
+variable           delay equal 0
+variable           skin equal 0
+
+# atom
+atom_style         isph
+atom_modify        map array		#store global array of proc ids on each proc
+
+print              "----------------"
+print              "Nx = ${Nx}"
+print              "dx = ${dx}"
+print              "h = ${h}"
+print              "skin = ${skin}"
+print              "nrun = ${nrun}"
+print              "----------------"
+
+# 2) Atom definition
+# ------------------
+# 1. There are 3 ways to define atoms in LAMMPS. 
+# - read them in from a data or 
+# - restart file via the read_data or 
+# - read_restart commands. 
+# These files can contain molecular topology information. 
+#
+# Or create atoms on a lattice (with no molecular topology). 
+# e.g., lattice, region, create_box, create_atoms. 
+# The entire set of atoms can be duplicated to make a larger simulation using the replicate command. 
+
+lattice            sq ${dx} origin 0.5 0.5 0.
+
+#region            name    block  xlo    xhi     ylo           yhi           zlo     zhi       units box
+region             box    block ${xmin} ${xmax} ${ymin} ${ymax}  ${zmin} ${zmax} units box
+
+create_box         3 box
+create_atoms       1 region box
+
+# 3) Settings
+# -----------
+# Once atoms and molecular topology are defined, a variety of settings can be specified: 
+# force field coefficients, simulation parameters, output options, etc.
+#
+# Force field coefficients are set by these commands (they can also be set in the read-in files): 
+# pair_coeff, bond_coeff, angle_coeff, dihedral_coeff, improper_coeff, kspace_style, 
+# dielectric, special_bonds.
+#
+# Various simulation parameters are set by these commands: 
+# neighbor, neigh_modify, group, timestep, reset_timestep, run_style, min_style, min_modify.
+#
+# Fixes impose a variety of boundary conditions, time integration, and diagnostic options. 
+# The fix command comes in many flavors.
+#
+# Various computations can be specified for execution during a simulation using the compute, 
+# compute_modify, and variable commands.
+#
+# Output options are set by the thermo, dump, and restart commands. 
+
+neighbor           ${skin} bin
+neigh_modify       every 1 delay ${delay} check yes
+
+pair_style         isph/corrected
+pair_coeff         * * channel-edl-potential.xml ${h} ${hmin}
+
+# apply fix for type 1 particles: psi field particles
+fix                1 all isph/error 
+fix                2 all isph 
+
+
+# 4) Run a simulation
+# -------------------
+# A molecular dynamics simulation is run using the run command. 
+# Energy minimization (molecular statics) is performed using the minimize command. 
+# A parallel tempering (replica-exchange) simulation can be run using the temper command. 
+
+variable           bndr equal ${r}-${cut}
+
+region             channel    block -${len} ${len} -${bndr}  ${bndr} ${zmin} ${zmax}   units box
+region             channel_lo block -${len} ${len} -${r}    -${bndr} ${zmin} ${zmax}   units box
+region             channel_hi block -${len} ${len}  ${bndr}  ${r}    ${zmin} ${zmax}   units box
+
+group              flow region channel
+group              bndr_lo region channel_lo
+group              bndr_hi region channel_hi
+
+group              solid subtract all flow bndr_lo bndr_hi
+
+set                group flow type 1
+set                group solid type 2
+set                group bndr_lo type 3
+set                group bndr_hi type 3
+
+
+# random perturbation
+variable           xi equal 0.1*${h}
+
+# testing anisotropy error
+#displace_atoms     flow random ${xi} ${xi} 0.0 42
+
+set                group all isph_density 1.0
+set                group all isph_viscosity 0.1
+set                group all isph_dielectric 1.0
+
+set                group all isph_pressure 0.0
+set                group solid isph_electric_potential_on_wall 1.0
+
+timestep           1.0
+variable           dumpfreq equal 1
+
+dump               dump all custom ${dumpfreq} channel-edl-potential-2d.dump id type x y z psi psigradx psigrady type 
+dump_modify        dump flush yes
+
+run                ${nrun}

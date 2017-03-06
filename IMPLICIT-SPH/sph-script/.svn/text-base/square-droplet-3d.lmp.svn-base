@@ -1,0 +1,141 @@
+dimension          3
+
+
+# 1) Initialization
+# -----------------
+# set parameters that need to be defined before atoms are created or read-in from a file.
+# e.g., units, dimension, newton, processors, boundary, atom_style, atom_modify.
+
+variable           r equal 0.5
+variable           rdrop equal 0.3
+
+# discretization
+variable           N equal 8
+variable           dx equal ${r}/${N}
+
+variable           rbox  equal ${r}
+
+# box domain
+variable           xmin equal -${rbox}
+variable           xmax equal  ${rbox}
+variable           ymin equal -${rbox}
+variable           ymax equal  ${rbox}
+variable           zmin equal -${rbox}
+variable           zmax equal  ${rbox}
+
+
+# smoothing length
+variable           h equal 1.8*${dx}
+
+# flow parameters
+variable           Umax equal 1.0
+
+variable           tstep equal 0.01*${dx}/${Umax}
+variable           tfinal equal 2.0
+variable           nrun equal ${tfinal}/${tstep}
+
+newton             off
+units              si
+boundary           p p p
+
+# skin setup; not really use
+variable           delay equal 0
+
+# atom
+atom_style         isph
+
+print              "----------------"
+print              "N = ${N}"
+print              "dx = ${dx}"
+print              "h = ${h}"
+print              "tstep = ${tstep}"
+print              "tfinal = ${tfinal}"
+print              "nrun = ${nrun}"
+print              "----------------"
+
+# 2) Atom definition
+# ------------------
+# 1. There are 3 ways to define atoms in LAMMPS. 
+# - read them in from a data or 
+# - restart file via the read_data or 
+# - read_restart commands. 
+# These files can contain molecular topology information. 
+#
+# Or create atoms on a lattice (with no molecular topology). 
+# e.g., lattice, region, create_box, create_atoms. 
+# The entire set of atoms can be duplicated to make a larger simulation using the replicate command. 
+
+##############################################################################
+# comment lattice, region, create_box, create_atoms if you want to read_restart 
+
+#lattice	           sc ${dx} #origin 0.5 0.5 0.5
+lattice	            bcc ${dx} 
+
+#region            name   block       xlo      xhi        ylo       yhi        zlo       zhi units box
+region             box    block ${xmin} ${xmax} ${ymin} ${ymax}  ${zmin} ${zmax} units box
+
+create_box    	   2 box
+create_atoms       1 region box
+
+# 3) Settings
+# -----------
+# Once atoms and molecular topology are defined, a variety of settings can be specified: 
+# force field coefficients, simulation parameters, output options, etc.
+#
+# Force field coefficients are set by these commands (they can also be set in the read-in files): 
+# pair_coeff, bond_coeff, angle_coeff, dihedral_coeff, improper_coeff, kspace_style, 
+# dielectric, special_bonds.
+#
+# Various simulation parameters are set by these commands: 
+# neighbor, neigh_modify, group, timestep, reset_timestep, run_style, min_style, min_modify.
+#
+# Fixes impose a variety of boundary conditions, time integration, and diagnostic options. 
+# The fix command comes in many flavors.
+#
+# Various computations can be specified for execution during a simulation using the compute, 
+# compute_modify, and variable commands.
+#
+# Output options are set by the thermo, dump, and restart commands. 
+
+neighbor           0.0 bin
+neigh_modify       every 1 delay ${delay} check yes
+
+pair_style         isph/corrected
+pair_coeff         * * square-droplet.xml ${h}
+
+# apply fix for type 1 particles: psi field particles
+fix                1 all isph
+variable           shiftcut equal ${h}*3.0
+fix                2 all isph/shift 0.04 1.0 ${shiftcut}
+
+# 4) Run a simulation
+# -------------------
+# A molecular dynamics simulation is run using the run command. 
+# Energy minimization (molecular statics) is performed using the minimize command. 
+# A parallel tempering (replica-exchange) simulation can be run using the temper command. 
+
+region             droplet  block -${rdrop} ${rdrop} -${rdrop}  ${rdrop} -${rdrop} ${rdrop}   units box
+#region             droplet  sphere 0.0 0.0 0.0 ${rdrop} side in units box
+region             square   block -${r} ${r} -${r}  ${r} -${r} ${r}   units box
+
+group              inner region droplet
+group              outer subtract all inner
+
+set                group inner type 1
+set                group outer type 2
+
+set		   group inner isph_density 1.0
+set		   group outer isph_density 1.0
+set		   group all isph_viscosity 0.1
+set                group all isph_pressure 0.0
+
+#
+timestep           ${tstep}
+
+# no need to dump out
+variable           dumpfreq equal 1
+dump               dump all custom ${dumpfreq} square-droplet-3d.dump id type x y z vx vy vz pressure type fx fy fz
+dump_modify        dump flush yes
+
+run                ${nrun}
+

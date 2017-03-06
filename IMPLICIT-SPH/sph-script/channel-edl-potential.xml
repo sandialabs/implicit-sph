@@ -1,0 +1,56 @@
+<ParameterList name="Implicit SPH Top-Level Parameters:
+                     Potential distribution in a channel with static charges">
+  <ParameterList name="Kernel Function">
+    <Parameter name="cut over h" type="double" value="2.0"/>      
+    <Parameter name="type" type="string" value="Wendland"/>
+    <Parameter name="MorrisSafeCoeff" type="double" value="0.0"/>      
+  </ParameterList>
+  <ParameterList name="Particle Information">
+    <Parameter name="type:1" type="string" value="fluid"/>
+    <Parameter name="type:2" type="string" value="solid:fixed"/>
+    <Parameter name="type:3" type="string" value="fluid"/>    
+  </ParameterList>
+  <ParameterList name="Physics Configuration">
+    <Parameter name="Poisson Boltzmann" type="string" value="Enabled"/>
+  </ParameterList> 
+  <ParameterList name="Poisson Boltzmann">
+    <Parameter name="Boundary" type="string" value="MorrisHolmes"/> 
+    <!-- F = -\div(eps \grad psi) + 2 (excb/psiref) sinh{psi} -->
+    <Parameter name="psiref" type="double" value="1"/>
+    <Parameter name="ezcb" type="double" value="50.0"/>
+    <Parameter name="linearized" type="int" value="0"/>
+  </ParameterList>
+  <ParameterList name="Analytic Solution">
+    <ParameterList name="Variable List">
+      <!-- Point (x,y,z) -->
+      <Parameter name="pt.x"  type="string" value="double"/>
+      <Parameter name="pt.y"  type="string" value="double"/>
+      <Parameter name="pt.z"  type="string" value="double"/>
+      <Parameter name="ezcb" type="string" value="double"/>
+      <Parameter name="psiref" type="string" value="double"/>
+      <Parameter name="eps" type="string" value="double"/>
+      <!-- Return values -->
+      <Parameter name="psi" type="string" value="double"/>
+    </ParameterList>
+    <ParameterList name="Function List">
+      <!-- Nonlinear version with assumption that kappa is large -->
+      <Parameter name="psi" 
+                 type="string" 
+                 value="double kappa = sqrt(2.0*ezcb/psiref/eps);
+                        double L = 1.0;
+                        double temp = exp(-kappa*(pt.y+L))*tanh(0.25);
+                        double temp2 = (1.0+temp)/(1.0-temp);
+                        double temp3 = exp(kappa*(pt.y-L))*tanh(0.25);
+                        double temp4 = (1.0+temp3)/(1.0-temp3);
+                        psi = log(pow(temp2*temp4,2.0));"/>
+                        <!--double x = tanh(0.25)*exp(-sqrt(2*eczb/psiref/eps)*(1.0-fabs(pt.y)));
+                        psi = 2.0*log((1+x)/(1-x));"/-->
+      <!-- Linear version -->
+      <!--Parameter name="psi" 
+                 type="string" 
+                 value="double kappa = sqrt(2.0*ezcb/psiref/eps);
+                 psi=cosh(kappa*pt.y)/cosh(kappa);"/-->
+    </ParameterList>
+  </ParameterList>
+</ParameterList>
+  

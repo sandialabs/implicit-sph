@@ -1,0 +1,53 @@
+<ParameterList name="Implicit SPH Top-Level Parameters: 
+                     Poisson Boltzmann Verification Problem with a Harmonic Function 2D/3D">
+  <ParameterList name="Kernel Function">
+    <Parameter name="cut over h" type="double" value="1.0"/>      
+    <Parameter name="MLS Order" type="int" value="4"/>
+  </ParameterList>
+  <ParameterList name="Physics Configuration">
+    <Parameter name="Poisson Boltzmann"            type="string" value="Enabled"/>
+    <Parameter name="Incompressible Navier Stokes" type="string" value="Disabled"/>          
+  </ParameterList> 
+  <ParameterList name="Poisson Boltzmann">
+    <!-- F = -\div (eps \grad psi) + 2 (ezcb / psiref) sinh{psi} + f -->
+    <Parameter name="psiref" type="double" value="1.0"/>
+    <Parameter name="ezcb" type="double" value="0.5"/>
+    <Parameter name="linearized" type="int" value="0"/>
+    <ParameterList name="Extra F">
+      <ParameterList name="Variable List">
+        <!-- Point (x,y,z) -->
+        <Parameter name="pt.x"  type="string" value="double"/>
+        <Parameter name="pt.y"  type="string" value="double"/>
+        <Parameter name="pt.z"  type="string" value="double"/>
+        <!-- Return values -->
+        <Parameter name="f" type="string" value="double"/>
+      </ParameterList>
+      <ParameterList name="Function List">
+        <Parameter name="f" 
+                   type="string" 
+                   value="f = -2.0*sin(pt.x)*cos(pt.y) - sinh(sin(pt.x)*cos(pt.y));"/>
+      </ParameterList>
+    </ParameterList>
+  </ParameterList>
+  <ParameterList name="Analytic Solution">
+    <ParameterList name="Variable List">
+      <!-- Point (x,y,z) -->
+      <Parameter name="pt.x"  type="string" value="double"/>
+      <Parameter name="pt.y"  type="string" value="double"/>
+      <Parameter name="pt.z"  type="string" value="double"/>
+      <!-- Return values -->
+      <Parameter name="psi"      type="string" value="double"/>
+      <Parameter name="psi.grad.x" type="string" value="double"/>
+      <Parameter name="psi.grad.y" type="string" value="double"/>
+      <Parameter name="psi.grad.z" type="string" value="double"/>
+    </ParameterList>
+    <ParameterList name="Function List">
+      <Parameter name="psi" type="string" 
+                 value="psi = sin(pt.x)*cos(pt.y);"/>
+      <Parameter name="psi.grad.x" type="string" 
+                 value="psi.grad.x = cos(pt.x)*cos(pt.y);"/>
+      <Parameter name="psi.grad.y" type="string" 
+                 value="psi.grad.y = -sin(pt.x)*sin(pt.y);"/>
+    </ParameterList>
+  </ParameterList>
+</ParameterList>

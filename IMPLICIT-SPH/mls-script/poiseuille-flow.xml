@@ -1,0 +1,48 @@
+<ParameterList name="Implicit SPH Top-Level Parameters: Couette Flow 2D">
+  <ParameterList name="Kernel Function">
+    <Parameter name="cut over h" type="double" value="1.0"/>
+    <Parameter name="MLS Order" type="int" value="2"/>
+  </ParameterList>
+  <ParameterList name="Physics Configuration">
+    <Parameter name="Incompressible Navier Stokes" type="string" value="Enabled"/>          
+  </ParameterList> 
+  <ParameterList name="Particle Information">
+    <Parameter name="type:1" type="string" value="fluid"/>
+    <Parameter name="type:2" type="string" value="boundary"/>
+  </ParameterList>
+  <ParameterList name="Incompressible Navier Stokes">
+    <Parameter name="Singular Poisson" type="string" value="NullSpace"/>
+    <Parameter name="Arbitrary Lagrangian Eulerian" type="string" value="Enabled"/>
+    <Parameter name="order" type="int"    value="2"/>
+    <Parameter name="theta" type="double" value="0.5"/>
+    <Parameter name="beta"  type="double" value="0.0"/>
+    <Parameter name="g.x"   type="double" value="10.0"/>
+    <Parameter name="g.y"   type="double" value="0.0"/>
+    <Parameter name="g.z"   type="double" value="0.0"/>
+  </ParameterList>
+  <ParameterList name="Analytic Solution">
+    <ParameterList name="Variable List">
+      <!-- Point (x,y,z) and g.x -->
+      <Parameter name="pt.x"  type="string" value="double"/>
+      <Parameter name="pt.y"  type="string" value="double"/>
+      <Parameter name="pt.z"  type="string" value="double"/>
+      <Parameter name="g.x"   type="string" value="double"/>
+      <Parameter name="nu"    type="string" value="double"/>      
+      <Parameter name="t"     type="string" value="double"/>
+      <!-- Return values -->
+      <Parameter name="u.x" type="string" value="double"/>
+    </ParameterList>
+    <ParameterList name="Function List">
+      <Parameter name="u.x" 
+                 type="string" 
+                 value="double pi = 3.1415926535897931;
+                        pt.y = pt.y + 0.5;
+                        u.x = g.x/(2.0*nu)*pt.y*(pt.y-1.0);
+                        for (int n=0;n!=40;n=n+1) { 
+                        u.x = u.x + (4.0*g.x)/(nu*pow(pi*(2*n+1),3))*sin(pi*pt.y*(2*n+1))*exp(-pow(pi*(2*n+1),2)*nu*t);
+                        }
+                        u.x = -1.0*u.x;"/>
+    </ParameterList>
+  </ParameterList>
+</ParameterList>
+

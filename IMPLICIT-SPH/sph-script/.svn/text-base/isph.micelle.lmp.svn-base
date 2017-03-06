@@ -1,0 +1,52 @@
+# 2d micelle simulation
+
+dimension	2
+
+variable        r equal 35.85686
+variable        dx equal 1.0
+variable        h equal 4.0*${dx}
+
+neighbor        0.0 bin
+neigh_modify    delay 5
+
+atom_style	isph
+
+newton          off
+units           si
+boundary        p p p
+
+read_data	isph.micelle.data
+special_bonds   fene
+
+######################################################
+
+pair_style      isph/corrected
+pair_coeff      * * isph.micelle.xml ${h}
+
+variable        R0 equal ${dx}
+bond_style 	isph/harmonic
+bond_coeff	1 50.0 ${R0}
+
+fix             1 all isph
+fix             2 all isph/shift 0.1
+
+variable        Umax equal 10.0 # 1.0
+
+variable        tstep equal 0.001*${dx}/${Umax}
+variable        tfinal equal 1.0
+variable        nrun equal ${tfinal}/${tstep}
+
+set             group all isph_density 1.0
+set             group all isph_viscosity 0.1
+set             group all isph_pressure 0.0
+
+velocity        all set 0.0 0.0 0.0 units box
+
+timestep        ${tstep}
+
+variable        dumpfreq equal 30
+dump            dump all custom ${dumpfreq} isph.micelle-2d.dump id type x y z vx vy pressure type fx fy
+dump_modify     dump flush yes
+
+reset_timestep  0
+run             1000 # ${nrun}

@@ -1,0 +1,37 @@
+<ParameterList name="Implicit SPH Top-Level Parameters: Droplet in Cylinder 2D/3D">
+  <ParameterList name="Kernel Function">
+    <Parameter name="cut over h" type="double" value="2.0"/>      
+    <Parameter name="type" type="string" value="Wendland"/>          
+  </ParameterList>
+  <ParameterList name="Physics Configuration">
+    <Parameter name="Surface Tension"              type="string" value="Enabled"/>
+    <Parameter name="Poisson Boltzmann"            type="string" value="Disabled"/>
+    <Parameter name="Incompressible Navier Stokes" type="string" value="Enabled"/>          
+  </ParameterList> 
+  <ParameterList name="Particle Information">
+    <Parameter name="type:1" type="string" value="fluid:phase:1"/>
+    <Parameter name="type:2" type="string" value="fluid:phase:2"/>
+    <Parameter name="type:3" type="string" value="solid:fixed"/>
+  </ParameterList>
+  <ParameterList name="Surface Tension">
+    <Parameter name="Modeling Method" type="string" value="ContinuumSurfaceForce"/>     
+    <Parameter name="Color Gradient"  type="string" value="Corrected"/>    
+    <!-- Surface tension coefficients --> 
+    <Parameter name="alpha" type="double" value="1.83"/>    
+    <!-- Solid contact angle in radian -->
+    <Parameter name="theta" type="double" value="1.069"/>    
+  </ParameterList>  
+  <ParameterList name="Incompressible Navier Stokes">
+    <Parameter name="Use Incremental Pressure" type="string" value="Enabled"/>
+    <Parameter name="Singular Poisson" type="string" value="NotSingular"/>
+    <Parameter name="Boundary" type="string" value="MorrisHolmes"/>
+    <Parameter name="theta" type="double" value="0.5"/>
+    <Parameter name="g.x"   type="double" value="4.9"/>
+    <Parameter name="g.y"   type="double" value="0.0"/>
+    <Parameter name="g.z"   type="double" value="0.0"/>
+  </ParameterList>
+  <ParameterList name="Preconditioner">
+    <Parameter name="Precond Package" type="string" value="ML"/>
+  </ParameterList>
+</ParameterList>
+

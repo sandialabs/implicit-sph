@@ -1,0 +1,56 @@
+ConstExtension
+
+N = 32
+                total # of particles = 198
+                total volume         = 8.144724699848996e-01
+
+                sol.psi.norm2        = 2.914489591712890e-01
+                err.psi.norm2        = 1.427722459319894e-01
+                relative error       = 4.898704951218574e-01
+N = 64
+                total # of particles = 845
+                total volume         = 8.079865338397587e-01
+
+                sol.psi.norm2        = 2.573084050422338e-01
+                err.psi.norm2        = 7.400657030449043e-02  0.94799
+                relative error       = 2.876181611414645e-01
+
+N = 128
+                total # of particles = 3354
+                total volume         = 8.014786583267870e-01
+
+                sol.psi.norm2        = 2.403485721275890e-01
+                err.psi.norm2        = 3.751298254128260e-02  0.98026
+                relative error       = 1.560774096106085e-01
+
+N = 256
+                total # of particles = 13107
+                total volume         = 7.988325266355302e-01
+
+                sol.psi.norm2        = 2.319431850663129e-01
+                err.psi.norm2        = 1.886109434171176e-02  0.99198
+                relative error       = 8.131773449743455e-02
+
+N = 512
+                total # of particles = 52326
+                total volume         = 7.970775409793502e-01
+
+                sol.psi.norm2        = 2.277654950493820e-01
+                err.psi.norm2        = 9.454070395115142e-03  0.99641
+                relative error       = 4.150791318529350e-02
+
+N = 1024
+                total # of particles = 210125
+                total volume         = 7.966616883466927e-01
+
+                sol.psi.norm2        = 2.256836874074448e-01
+                err.psi.norm2        = 4.732600852333879e-03  0.99830
+                relative error       = 2.097006171203565e-02
+
+N = 2048
+                total # of particles = 840090
+                total volume         = 7.962613712691655e-01
+
+                sol.psi.norm2        = 2.246449750572316e-01
+                err.psi.norm2        = 2.369180713678953e-03  0.99825
+                relative error       = 1.054633299977161e-02

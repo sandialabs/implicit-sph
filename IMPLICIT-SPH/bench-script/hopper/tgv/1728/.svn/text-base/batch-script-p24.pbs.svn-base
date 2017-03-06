@@ -1,0 +1,10 @@
+#PBS -q debug
+#PBS -l mppwidth=24
+#PBS -l walltime=00:10:00 
+#PBS -N lmp-hopper
+#PBS -j oe
+#PBS -m a
+#PBS -A m2008
+
+cd $PBS_O_WORKDIR  
+aprun -n 8 -S 2 ./lmp_hopper < tgv-3d-p24.lmp

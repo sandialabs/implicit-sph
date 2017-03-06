@@ -1,0 +1,36 @@
+<ParameterList name="Implicit SPH Top-Level Parameters: Lid Driven Cavity 2D/3D">
+  <ParameterList name="Kernel Function">
+    <Parameter name="cut over h" type="double" value="2.0"/>      
+    <Parameter name="type" type="string" value="Wendland"/>          
+  </ParameterList>
+  <ParameterList name="Particle Information">
+    <!-- use three types and 1- fluid , 2,3 - solid -->
+    <Parameter name="type:1" type="string" value="fluid:moving"/>
+    <Parameter name="type:2" type="string" value="solid:fixed"/>
+    <Parameter name="type:3" type="string" value="solid:fixed"/>    
+  </ParameterList>
+  <ParameterList name="Physics Configuration">
+    <Parameter name="Poisson Boltzmann"             type="string" value="Disabled"/>
+    <Parameter name="Incompressible Navier Stokes" type="string" value="Enabled"/>          
+  </ParameterList> 
+  <ParameterList name="Incompressible Navier Stokes">
+    <Parameter name="theta" type="double" value="1.0"/>
+    <Parameter name="Boundary" type="string" value="Dirichlet"/>
+    <!-- 
+       beta maybe function of viscosity, umax - probably at the end 
+       it is Re. for the 2D cavity problem, 
+       use beta = 1.0 for Re=100  (nu=0.1,  umax=10.0)
+       use beta = 0.1 for Re=1000 (nu=0.01, umax=10.0)
+      -->
+    <Parameter name="beta"  type="double" value="0.1"/>
+    <Parameter name="g.x"   type="double" value="0.0"/>
+    <Parameter name="g.y"   type="double" value="0.0"/>
+    <Parameter name="g.z"   type="double" value="0.0"/>
+  </ParameterList>
+  <ParameterList name="Preconditioner">
+    <Parameter name="Precond Package" type="string" value="ML"/>  
+    <Parameter name="ML output"       type="int"    value="0"/> 
+    <Parameter name="coarse: type"    type="string" value="Amesos-MUMPS"/>
+  </ParameterList>
+</ParameterList>
+  

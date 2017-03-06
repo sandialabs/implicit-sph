@@ -1,0 +1,34 @@
+<ParameterList name="Implicit MLS Top-Level Parameters: 
+                     Poisson Operator Test  2D/3D">
+  <ParameterList name="Kernel Function">
+    <Parameter name="cut over h" type="double" value="1.0"/>      
+  </ParameterList>
+  <ParameterList name="Physics Configuration">
+    <Parameter name="Poisson Boltzmann"            type="string" value="Disabled"/>
+    <Parameter name="Incompressible Navier Stokes" type="string" value="Enabled"/>          
+  </ParameterList> 
+  <ParameterList name="Incompressible Navier Stokes">
+    <Parameter name="Singular Poisson" type="string" value="NullSpace"/>
+    <!-- Time discretization parameter and umax-->
+    <Parameter name="theta" type="double" value="0.5"/>
+  </ParameterList>
+  <ParameterList name="Analytic Solution">
+    <ParameterList name="Variable List">
+      <!-- Point (x,y,z) and umax-->
+      <Parameter name="pt.x"  type="string" value="double"/>
+      <Parameter name="pt.y"  type="string" value="double"/>
+      <Parameter name="pt.z"  type="string" value="double"/>
+      <!-- Return values -->
+      <Parameter name="p"   type="string" value="double"/>
+    </ParameterList>
+    <ParameterList name="Function List">
+      <Parameter name="p" 
+                 type="string" 
+                 value="p = cos(2.0*pt.x)+cos(2.0*pt.y);"/>
+    </ParameterList>
+  </ParameterList>
+  <ParameterList name="Preconditioner">
+    <Parameter name="Precond Package" type="string" value="ML"/>
+  </ParameterList>
+</ParameterList>
+
