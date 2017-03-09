@@ -43,7 +43,7 @@ namespace LAMMPS_NS {
 
       _param = Teuchos::rcp(new Teuchos::ParameterList);
       
-      _param->set("ML output",10);
+      _param->set("ML output",5);
       _param->set("max levels",5);
       _param->set("increasing or decreasing","increasing"); 
       _param->set("aggregation: type","Uncoupled");

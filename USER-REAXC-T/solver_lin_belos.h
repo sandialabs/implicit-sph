@@ -52,8 +52,8 @@ namespace LAMMPS_NS {
 
   inline int 
   SolverLin_Belos::solveBlockProblem(PrecondWrapper *prec, const char* name) {
-    if (_comm.MyPID() == 0 && name != NULL)
-      cout << ">> Belos(Block)::Label - "  << name << endl;
+    // if (_comm.MyPID() == 0 && name != NULL)
+    //   cout << ">> Belos(Block)::Label - "  << name << endl;
 
     IS_VALID(_b->NumVectors() == _dim, _comm.MyPID(), 
              ">> SolverLin_Belos::solveBlockProblem, dimension of rhs does not match to the block matrix");
@@ -103,8 +103,8 @@ namespace LAMMPS_NS {
     
     // solve the problem
     if (status == Belos::Converged) {
-      if (_comm.MyPID() == 0) 
-        cout << ">> Belos::Status - Passed! " << (name == NULL ? " " : name) << endl;
+      // if (_comm.MyPID() == 0) 
+      //   cout << ">> Belos::Status - Passed! " << (name == NULL ? " " : name) << endl;
     } else {
       if (_comm.MyPID() == 0)
         cout << ">> Belos::Status - Failed to converge! " << (name == NULL ? " " : name) << endl;;
@@ -129,8 +129,8 @@ namespace LAMMPS_NS {
 
   inline int
   SolverLin_Belos::solveProblem(PrecondWrapper *prec, const char *name) {
-    if (_comm.MyPID() == 0 && name != NULL)
-      cout << ">> Belos::Label - "  << name << endl;;
+    // if (_comm.MyPID() == 0 && name != NULL)
+    //   cout << ">> Belos::Label - "  << name << endl;;
 
     // if null, load a default parameterlist
     setParameters(_param.get());
@@ -192,8 +192,8 @@ namespace LAMMPS_NS {
     
     // solve the problem
     if (status == Belos::Converged) {
-      if (_comm.MyPID() == 0) 
-        cout << ">> Belos::Status - Passed! " << (name == NULL ? " " : name) << endl;
+      // if (_comm.MyPID() == 0) 
+      //   cout << ">> Belos::Status - Passed! " << (name == NULL ? " " : name) << endl;
     } else {
       if (_comm.MyPID() == 0)
         cout << ">> Belos::Status - Failed to converge! " << (name == NULL ? " " : name) << endl;;
@@ -228,12 +228,12 @@ namespace LAMMPS_NS {
       // create top-level parameter
       _param = Teuchos::rcp(new Teuchos::ParameterList);  
       
-      _param->set("Flexible Gmres", true);           // Flexible Gmres
+      //_param->set("Flexible Gmres", true);           // Flexible Gmres
       _param->set("Num Blocks", 50);                 // Maximum number of blocks in Krylov factorization
       _param->set("Block Size", 1);                  // Blocksize to be used by iterative solver
       _param->set("Maximum Iterations", 500);        // Maximum number of iterations allowed
       _param->set("Maximum Restarts", 15 );          // Maximum number of restarts allowed                
-      _param->set("Convergence Tolerance", 1.0e-8);  // Relative convergence tolerance requested
+      _param->set("Convergence Tolerance", 1.0e-6);  // Relative convergence tolerance requested
       //_param->set("Orthogonalization", "IMGS");    // Orthogonalization method
       _param->set("Orthogonalization", "DGKS");      // Orthogonalization method
       _param->set("Solver Type","Block GMRES"); 
