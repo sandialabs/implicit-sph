@@ -30,6 +30,9 @@ FixStyle(qeq/reax,FixQEqReax)
 #ifndef LMP_FIX_QEQ_REAX_H
 #define LMP_FIX_QEQ_REAX_H
 
+// lammps-trilinos interface header
+#include "lammps-trilinos.h"
+
 #include "fix.h"
 
 namespace LAMMPS_NS {

@@ -485,6 +485,102 @@ void FixQEqReax::pre_force(int vflag)
   if( n > n_cap*DANGER_ZONE || m_fill > m_cap*DANGER_ZONE )
     reallocate_matrix();
 
+#define __USE_TRILINOS__
+#ifdef __USE_TRILINOS__
+  // ** lammps particle connectivity
+  const int dim = domain->dimension;
+  const int inum = reaxc->list->inum;
+  const int *ilist = reaxc->list->ilist;
+  const int *numneigh = reaxc->list->numneigh;
+  /* */ int **firstneigh = reaxc->list->firstneigh;
+  /* */ tagint *tag = atom->tag;
+  /* */ int *mask = atom->mask;  
+
+  // ** create a nodal map (row partition of matrix)
+  Epetra_IntSerialDenseVector idx(Copy, tag, n);
+  Epetra_Map nodalmap(-1, n, idx.Values(), 1, Epetra_MpiComm(world));
+
+  // ** allocate crs graph 
+  Epetra_IntSerialDenseVector row(inum);
+  for (int ii=0;ii<inum;++ii) 
+    row[ii] = numneigh[ilist[ii]] + 1;
+  idx.Size(row.InfNorm());
+
+  // ** construct and fill the crs graph
+  Epetra_CrsGraph graph(Copy, nodalmap, row.Values(), true);
+  for (int ii=0;ii<inum;++ii) {
+    const int i = ilist[ii];
+
+    // add neighbor list    
+    int cnt = 0;
+    if (mask[i] & groupbit) {
+      const int *jlist = firstneigh[i];
+      const int jnum = numneigh[i];
+
+      for (int jj=0;jj<jnum;++jj) {
+        const int j = jlist[jj];
+        idx[cnt++] = tag[j];
+      }
+    }
+    // self connectivity
+    idx[cnt++] = tag[i];
+
+    // construct a graph row by row
+    graph.InsertGlobalIndices(tag[i], (int)cnt, idx.Values());
+  }
+  graph.FillComplete();
+  graph.OptimizeStorage();
+
+  // ** create crs matrix
+  Epetra_CrsMatrix A(Copy, graph);
+  A.FillComplete();
+
+  // ** create preconditioner with default parameters
+  PrecondWrapper_ML prec(world);
+  prec.setParameters();
+  
+  {
+    // set coordinate data in ml
+    Epetra_MultiVector xt(nodalmap, 3, false);
+    double **xt_ptr = xt.Pointers();
+  
+    // format requires transpose copy
+    util.copyDenseMatrix(3, n, &atom->x[0][0],
+                         true, &xt_ptr[0][0]);
+    prec.setCoordinates(dim,
+                        xt_ptr[0],
+                        xt_ptr[1],
+                        xt_ptr[2]);
+  }
+
+  // ** matrix fill on A
+  
+  // ** create linear solver with default parameters
+  SolverLin_Belos li_solver(world);
+  li_solver.setParameters();
+
+  // ** associate matrix
+  li_solver.setNodalMap(&nodalmap);
+  li_solver.setMatrix(&A);
+  prec.setMatrix(&A);
+
+  {
+    // ** wrap/create [nlocal x 1] vector for x and b
+    li_solver.createSolutionMultiVector(s, n, 1);
+    li_solver.createLoadMultiVector(b_s, n, 1);
+    
+    // ** vector fill on b
+    // li_solver.solveProblem(prec, "fix-qeq-reax:: b_s, s");
+  }
+  {
+    // ** wrap/create [nlocal x 1] vector for x and b
+    li_solver.createSolutionMultiVector(t, n, 1);
+    li_solver.createLoadMultiVector(b_t, n, 1);
+    
+    // ** vector fill on b
+    //li_solver.solveProblem(prec, "fix-qeq-reax:: b_t, t");
+  }
+#else
   init_matvec();
 
 #ifndef CG_ASYNC
@@ -493,6 +589,7 @@ void FixQEqReax::pre_force(int vflag)
 #else
   matvecs = CG_async(b_s, s);    	// CG on s - parallel
   matvecs += CG_async(b_t, t); 	// CG on t - parallel
+#endif
 #endif
 
   calculate_Q();
