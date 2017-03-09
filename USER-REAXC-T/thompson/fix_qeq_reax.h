@@ -48,6 +48,7 @@ class FixQEqReax : public Fix {
   void setup_pre_force_respa(int, int);
   void pre_force_respa(int, int, int);
 
+  void min_setup_pre_force(int);
   void min_pre_force(int);
 
   int matvecs;
@@ -116,6 +117,10 @@ class FixQEqReax : public Fix {
   void calculate_Q();
 
   int CG(double*,double*);
+  int CG_async(double*,double*);
+  void parallel_dot_async(double*, double*, int, double*, MPI_Request*);
+  void parallel_dot_wait (MPI_Request*, MPI_Status*);
+
   //int GMRES(double*,double*);
   void sparse_matvec(sparse_matrix*,double*,double*);
 

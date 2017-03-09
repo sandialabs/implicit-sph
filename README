@@ -1,15 +1,102 @@
 
-Install
-=======
+Introduction
+============
 
 
 Trilinos Configuration
 ======================
 
+1. Clone the Trilinos repository from github.
 
-ISPH Configuration
-==================
+```
+git clone https://github.com/trilinos/Trilinos.git your-implicit-sph-directory
+```
 
+2. Cutomize the build script ``run-conf-implicit-sph.sh``. 
+   
+   We use Epetra (mpi only) solver stack in the Trilinos packages. 
+   Major packages are
+   - Epetra : distributed linear algebra data structure
+   - Teuchos : utilities providing blas lapck wrappers and reference count pointers
+   - Ifpack : incomplete factorization preconditioners 
+   - Belos : Krylov solvers e.g., GMRES, CG and their algorithm variants
+   - ML : multi grid preconditioner
+   - NOX : nonlinear solver
+   - Stratimikos : XML based solver harnessing tool
+   - Thyra and Teko : block matrix interface
+   - Zoltan : a collection of graph partitioners 
+
+```
+cmake \
+    -D Trilinos_WARNINGS_AS_ERRORS_FLAGS:STRING="" \
+    -D Trilinos_VERBOSE_CONFIGURE:BOOL=OFF \
+    -D Trilinos_ENABLE_Fortran:BOOL=OFF \
+    -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF \
+    -D Trilinos_ENABLE_ALL_OPTIONAL_PACKAGES:BOOL=OFF \
+    -D Trilinos_ENABLE_TESTS:BOOL=ON \
+    -D Trilinos_ENABLE_EXAMPLES:BOOL=ON \
+    -D Trilinos_ENABLE_Teuchos:BOOL=ON \
+    -D Trilinos_ENABLE_Epetra:BOOL=ON \
+    -D Epetra_ENABLE_TESTS:BOOL=ON \
+    -D Trilinos_ENABLE_EpetraExt:BOOL=ON \
+    -D Trilinos_ENABLE_Ifpack:BOOL=ON \
+    -D Trilinos_ENABLE_Belos:BOOL=ON \
+    -D Trilinos_ENABLE_ML:BOOL=ON \
+    -D Trilinos_ENABLE_NOX:BOOL=ON \
+    -D NOX_ENABLE_TESTS:BOOL=ON \
+    -D Trilinos_ENABLE_Stratimikos:BOOL=ON \
+    -D Stratimikos_ENABLE_TEUCHOS_TIME_MONITOR:BOOL=ON \
+    -D Trilinos_ENABLE_Thyra:BOOL=ON \
+    -D Trilinos_ENABLE_Teko:BOOL=ON \
+    -D Trilinos_ENABLE_Zoltan:BOOL=ON \
+    -D TPL_ENABLE_MPI:BOOL=ON \
+    -D TPL_ENABLE_BLAS:STRING=ON \
+    -D TPL_BLAS_LIBRARIES="-L/usr/lib64 -lblas -llapack -lgfortran" \
+    \
+    -D Trilinos_ENABLE_EXPLICIT_INSTANTIATION:BOOL=ON \
+    \
+    -D CMAKE_INSTALL_PREFIX:PATH=/your/trilinos/install/directory \
+    -D CMAKE_BUILD_TYPE:STRING=RELEASE \
+    -D CMAKE_VERBOSE_MAKEFILE:BOOL=OFF \
+    -D CMAKE_CXX_FLAGS:STRING="-g -O3" \
+    -D BUILD_SHARED_LIBS:BOOL=OFF \
+    \
+    /your/trilinos/source/directory
+```
+
+3. Create a build directory (must be separated from the source directory) and 
+   build library
+   
+```
+cd your-build-directory
+. /your/implicit-sph/directory/run-conf-implicit-sph.sh
+make -j8 install
+```
+
+4. Testing 
+```
+cd your-build-directory
+ctest -j8
+```
+
+If ctest reports no failure, we just finished the most difficult part of this code.
+
+
+LAMMPS and ISPH Configuration
+=============================
+
+1. Users can clone LAMMPS or download a tar ball
+
+```
+git clone git://git.lammps.org/lammps-ro.git your-lammps-directory
+```
+HELP NEEDED. I do not how to work two git repository together. At this moment, let's 
+use a tar ball version from (http://lammps.sandia.gov/download.html) and install isph 
+code in the ``src`` directory.
+
+2. Copy Makefile.machine to MAKE/Machines directory
+
+3. make yes-implicit-sph; make machine -j8
 
 Compile and Test
 ================

@@ -440,6 +440,13 @@ void FixQEqReax::setup_pre_force_respa(int vflag, int ilevel)
 
 /* ---------------------------------------------------------------------- */
 
+void FixQEqReax::min_setup_pre_force(int vflag)
+{
+  setup_pre_force(vflag);
+}
+
+/* ---------------------------------------------------------------------- */
+
 void FixQEqReax::init_storage()
 {
   int NN;
@@ -479,8 +486,15 @@ void FixQEqReax::pre_force(int vflag)
     reallocate_matrix();
 
   init_matvec();
+
+#ifndef CG_ASYNC
   matvecs = CG(b_s, s);    	// CG on s - parallel
   matvecs += CG(b_t, t); 	// CG on t - parallel
+#else
+  matvecs = CG_async(b_s, s);    	// CG on s - parallel
+  matvecs += CG_async(b_t, t); 	// CG on t - parallel
+#endif
+
   calculate_Q();
 
   if( comm->me == 0 ) {
@@ -647,6 +661,115 @@ double FixQEqReax::calculate_H( double r, double gamma )
   return Taper * EV_TO_KCAL_PER_MOL / denom;
 }
 
+
+
+/* ---------------------------------------------------------------------- */
+
+int FixQEqReax::CG_async(double *b, double *x)
+{
+  int  i, j, imax;
+  double tmp, alpha, beta, b_norm;
+  double sig_old, sig_new;
+  MPI_Request request;
+  MPI_Status status;
+
+  int nn, jj;
+  int *ilist;
+  if (reaxc) {
+    nn = reaxc->list->inum;
+    ilist = reaxc->list->ilist;
+  } else {
+    nn = list->inum;
+    ilist = list->ilist;
+  }
+
+  imax = 200;
+
+  pack_flag = 1;
+  sparse_matvec( &H, x, q );
+  comm->reverse_comm_fix( this ); //Coll_Vector( q );
+
+  vector_sum( r , 1.,  b, -1., q, nn );
+
+  for( jj = 0; jj < nn; ++jj ) {
+    j = ilist[jj];
+    if (atom->mask[j] & groupbit)
+      d[j] = r[j] * Hdia_inv[j]; //pre-condition
+  }
+
+  b_norm = parallel_norm( b, nn );
+
+  // // use MPI_Iallreduce, wait later when sig_new is needed
+  // parallel_dot_async(r, d, nn, &sig_new, &request);
+  // // wait now, since sig_new is needed
+  // parallel_dot_wait (&request, &status);
+  sig_new = parallel_dot(r, d, nn);
+
+  for( i = 1; i < imax; ++i ) { // sig_new test deferred
+    comm->forward_comm_fix(this); //Dist_vector( d );
+    sparse_matvec( &H, d, q );
+    comm->reverse_comm_fix(this); //Coll_vector( q );
+    
+    tmp = parallel_dot( d, q, nn);
+
+    alpha = sig_new / tmp;
+    
+    // if (comm->me == 0) {
+    //   char str[128];
+    //   sprintf(str,"Fix qeq/reax CG_async i = %d sig_new = %g alpha = %g", i, sig_new, alpha);
+    //   error->warning(FLERR,str);
+    // }
+
+    vector_add( r, -alpha, q, nn );
+    
+    // pre-conditioning
+
+    for( jj = 0; jj < nn; ++jj ) {
+      j = ilist[jj];
+      if (atom->mask[j] & groupbit)
+	p[j] = r[j] * Hdia_inv[j];
+    }
+    
+    // use MPI_Allreduce, wait later when sig_new is needed
+
+    sig_old = sig_new;
+    parallel_dot_async( r, p, nn, &sig_new, &request);
+
+    // update x while waiting
+    
+    vector_add( x, alpha, d, nn );
+
+    // wait now, since sig_new is needed
+
+    parallel_dot_wait (&request, &status);
+
+    // check and bail here
+
+    if (sqrt(sig_new) / b_norm <= tolerance) break;
+
+    beta = sig_new / sig_old;
+    vector_sum( d, 1., p, beta, d, nn );
+  }
+
+  if (i >= imax && comm->me == 0) {
+    char str[128];
+    sprintf(str,"Fix qeq/reax CG_async convergence failed after %d iterations "
+            "at " BIGINT_FORMAT " step",i,update->ntimestep);
+    error->warning(FLERR,str);
+  }
+  // else if (comm->me == 0) {
+  //   char str[128];
+  //   sprintf(str,"Fix qeq/reax CG_async converged after %d iterations "
+  //           "at " BIGINT_FORMAT " step signew = %g ",
+  // 	    i,update->ntimestep,sig_new);
+  //   error->warning(FLERR,str);
+  // }
+
+  return i;
+}
+
+//**********************************************
+
 /* ---------------------------------------------------------------------- */
 
 int FixQEqReax::CG( double *b, double *x )
@@ -690,6 +813,12 @@ int FixQEqReax::CG( double *b, double *x )
     tmp = parallel_dot( d, q, nn);
     alpha = sig_new / tmp;
 
+    // if (comm->me == 0) {
+    //   char str[128];
+    //   sprintf(str,"Fix qeq/reax CG i = %d sig_new = %g alpha = %g",i, sig_new, alpha);
+    //   error->warning(FLERR,str);
+    // }
+
     vector_add( x, alpha, d, nn );
     vector_add( r, -alpha, q, nn );
 
@@ -713,7 +842,14 @@ int FixQEqReax::CG( double *b, double *x )
     sprintf(str,"Fix qeq/reax CG convergence failed after %d iterations "
             "at " BIGINT_FORMAT " step",i,update->ntimestep);
     error->warning(FLERR,str);
-  }
+  } 
+  // else if (comm->me == 0) {
+  //   char str[128];
+  //   sprintf(str,"Fix qeq/reax CG converged after %d iterations "
+  //           "at " BIGINT_FORMAT " step signew = %g ",
+  // 	    i,update->ntimestep,sig_new);
+  //   error->warning(FLERR,str);
+  // }
 
   return i;
 }
@@ -974,7 +1110,42 @@ double FixQEqReax::parallel_dot( double *v1, double *v2, int n)
 
 /* ---------------------------------------------------------------------- */
 
-double FixQEqReax::parallel_vector_acc( double *v, int n )
+void FixQEqReax::parallel_dot_async(double *v1, double *v2, int nn, 
+				    double *res, MPI_Request *request) {
+  int  i;
+  double my_dot;
+
+  int ii;
+  int *ilist;
+
+  if (reaxc)
+    ilist = reaxc->list->ilist;
+  else
+    ilist = list->ilist;
+
+  my_dot = 0.0;
+  for( ii = 0; ii < n; ++ii ) {
+    i = ilist[ii];
+    if (atom->mask[i] & groupbit)
+      my_dot += v1[i] * v2[i];
+  }
+
+  MPI_Iallreduce(&my_dot, res, 1, MPI_DOUBLE, 
+		  MPI_SUM, MPI_COMM_WORLD, request);
+  return;
+}
+
+/* ---------------------------------------------------------------------- */
+
+void FixQEqReax::parallel_dot_wait(MPI_Request *request, 
+				    MPI_Status *status) {
+  MPI_Wait(request, status);
+  return;
+}
+
+/* ---------------------------------------------------------------------- */
+
+double FixQEqReax::parallel_vector_acc(double *v, int n )
 {
   int  i;
   double my_acc, res;
