@@ -1,0 +1,23 @@
+This directory contains a very small LAMMPS example that uses the LAMMPS ReaxFF charge equilibration scheme,
+handled by the LAMMPS FixQEqReax class. I included the modified source files for this class, where I experimented
+with a non-blocking version of CG, activated using -DCG_ASYNC.
+
+1. Download LAMMPS from lammps.sandia.gov or github
+2. Figure out how to compile it as you wish
+3. To add in ReaxFF, do:
+      3a) make yes-user-reaxc
+      3b) recompile
+      
+4. To run the example, do:
+
+mpirun -np 4 $LAMMPS/src/lmp_mac_mpi -in in.test -var nrep 2 -var nsteps 100 -var qeq_tol 1.0e-6
+ 
+Note, number of atoms scales as nrep^3
+
+5. If you want to try my non-blocking version, just copy fix_qeq_reax.cpp/h to $LAMMPS/src and recompile.
+
+The file Aktulga.pdf is a draft of the paper that Metin Aktulga wrote describing the CG strategy.
+It was eventually published as Aktulga, Fogarty, Pandit, Grama, Parallel Computing, 38, 245-259 (2012).
+The that in the paper, references to LAMMPS are to a previous implementation of charge equilibration
+in LAMMPS, whereas the current LAMMPS implementation is based on Metin's code (PuREMD)
+
