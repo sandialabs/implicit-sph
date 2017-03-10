@@ -547,21 +547,22 @@ void FixQEqReax::pre_force(int vflag)
   A.FillComplete();
 
   // ** create preconditioner with default parameters
+  //PrecondWrapper_Ifpack prec(world);
   PrecondWrapper_ML prec(world);
   prec.setParameters();
-  {
-    // set coordinate data in ml
-    Epetra_MultiVector xt(nodalmap, 3, false);
-    double **xt_ptr = xt.Pointers();
+  // {
+  //   // set coordinate data in ml
+  //   Epetra_MultiVector xt(nodalmap, 3, false);
+  //   double **xt_ptr = xt.Pointers();
   
-    // format requires transpose copy
-    util.copyDenseMatrix(3, n, &atom->x[0][0],
-                         true, &xt_ptr[0][0]);
-    prec.setCoordinates(dim,
-                        xt_ptr[0],
-                        xt_ptr[1],
-                        xt_ptr[2]);
-  }
+  //   // format requires transpose copy
+  //   util.copyDenseMatrix(3, n, &atom->x[0][0],
+  //                        true, &xt_ptr[0][0]);
+  //   prec.setCoordinates(dim,
+  //                       xt_ptr[0],
+  //                       xt_ptr[1],
+  //                       xt_ptr[2]);
+  // }
 
   // ** fill matrix A
   Epetra_SerialDenseVector val(max_neighbor_size);

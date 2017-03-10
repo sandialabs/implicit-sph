@@ -234,11 +234,15 @@ namespace LAMMPS_NS {
       _param->set("Maximum Iterations", 500);        // Maximum number of iterations allowed
       _param->set("Maximum Restarts", 15 );          // Maximum number of restarts allowed                
       _param->set("Convergence Tolerance", 1.0e-6);  // Relative convergence tolerance requested
-      //_param->set("Orthogonalization", "IMGS");    // Orthogonalization method
-      _param->set("Orthogonalization", "DGKS");      // Orthogonalization method
-      _param->set("Solver Type","Block GMRES"); 
-      _param->set("Num Recycled Blocks", 50);
+      _param->set("Orthogonalization", "IMGS");    // Orthogonalization method
+      //_param->set("Orthogonalization", "DGKS");      // Orthogonalization method
 
+      // Solver choice : somehow CG does not work on me... 
+      _param->set("Solver Type","Block CG"); 
+      //_param->set("Solver Type","Block GMRES");
+      //_param->set("Solver Type","Recycling GMRES"); 
+      _param->set("Num Recycled Blocks", 30);
+     
       // output 
       _param->set ("Output Frequency", 10);
       _param->set ("Output Style", 1);

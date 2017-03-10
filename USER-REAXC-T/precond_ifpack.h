@@ -32,7 +32,7 @@ namespace LAMMPS_NS {
       
       // Ifpack native params
       _param->set("fact: drop tolerance", 1e-9);
-      _param->set("fact: level-of-fill", 1);
+      _param->set("fact: level-of-fill", 0);
       // the combine mode is on the following:
       // "Add", "Zero", "Insert", "InsertAdd", "Average", "AbsMax"
       // Their meaning is as defined in file Epetra_CombineMode.h

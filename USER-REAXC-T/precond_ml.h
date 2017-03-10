@@ -45,13 +45,22 @@ namespace LAMMPS_NS {
       
       _param->set("ML output",5);
       _param->set("max levels",5);
-      _param->set("increasing or decreasing","increasing"); 
-      _param->set("aggregation: type","Uncoupled");
-      _param->set("smoother: type","symmetric Gauss-Seidel");                      
-      _param->set("smoother: sweeps",1);                                        
-      _param->set("smoother: pre or post","both");
-      _param->set("coarse: type","Amesos-KLU");
-      //_param->set("coarse: type","Amesos-MUMPS");
+      // _param->set("increasing or decreasing","increasing"); 
+      // _param->set("aggregation: type","Uncoupled");
+
+      // _param->set("smoother: type","Jacobi"); 
+
+      // // _param->set("smoother: type","symmetric Gauss-Seidel");                      
+      // // _param->set("smoother: Gauss-Seidel efficient symmetric",true);
+
+      // //_param->set("smoother: type","IC"); 
+
+      // //_param->set("smoother: sweeps",3);                                        
+      // //_param->set("smoother: pre or post","both");
+      
+      // //_param->set("coarse: type","Amesos-KLU");
+      // _param->set("coarse: type","symmetric Gauss-Seidel");               
+      // _param->set("coarse: type","Jacobi");               
     } else {
       if (_param.get() != param)
         _param = Teuchos::rcp(param, false);
