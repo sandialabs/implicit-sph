@@ -213,6 +213,9 @@ int UtilsReference::updateSymRankDenseMatrix(const double alpha,
         VIEW2(A, lda, i, j) += alpha*x[i]*x[j];
     break;
   }
+  default:
+    // error
+    break;
   }
 
   return LAMMPS_SUCCESS;
