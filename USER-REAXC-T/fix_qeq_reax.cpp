@@ -541,9 +541,10 @@ void FixQEqReax::pre_force(int vflag)
   graph.FillComplete();
   graph.OptimizeStorage();
 
-  // ** create crs matrix
+  // ** create crs matrix and initialize with zeros
   Epetra_CrsMatrix A(Copy, graph);
   Epetra_Vector diag(nodalmap);
+  A.FillComplete();
 
   // ** create preconditioner with default parameters
   PrecondWrapper_ML prec(world);
@@ -566,7 +567,6 @@ void FixQEqReax::pre_force(int vflag)
   Epetra_SerialDenseVector val(max_neighbor_size);
   {
     diag.PutScalar(1.0);
-    //A.ReplaceDiagonalValues(diag);
 
     for (int ii=0;ii<inum;++ii) {
       const int i = ilist[ii];
@@ -608,14 +608,15 @@ void FixQEqReax::pre_force(int vflag)
         val[cnt] = eta[type[i]];
         ++cnt;
 
-        A.ReplaceGlobalValues(tag[i], cnt, val.Values(), idx.Values());
+        // with periodic boudnary, the same particles can be shown multiple times
+        A.SumIntoGlobalValues(tag[i], cnt, val.Values(), idx.Values());
       } 
     }
     A.FillComplete();
     A.OptimizeStorage();
   }
   
-  // ** build full matrix (A is upper triangular now)
+  // ** build full matrix : A+ A^T
   Epetra_CrsMatrix AA(Copy, nodalmap, max_neighbor_size); 
   {
     Epetra_CrsMatrix *S;
@@ -623,7 +624,6 @@ void FixQEqReax::pre_force(int vflag)
     trans.CreateTranspose(true, S, &nodalmap);
     
     // merge with A
-    A.ExtractDiagonalCopy(diag);
     for (int ii=0;ii<inum;++ii) {
       const int i = ilist[ii];
       if (mask[i] & groupbit) {
@@ -639,6 +639,7 @@ void FixQEqReax::pre_force(int vflag)
     AA.OptimizeStorage();
     
     // replace diagonal always after fill complete
+    A.ExtractDiagonalCopy(diag);
     AA.ReplaceDiagonalValues(diag);
   }
 
@@ -841,7 +842,7 @@ void FixQEqReax::compute_H()
           m_fill++;
         }
       }
-      H.numnbrs[i] = m_fill - H.firstnbr[i];
+      H.numnbrs[i] = m_fill - H.firstnbr[i];      
     }
   }
 
