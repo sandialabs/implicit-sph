@@ -515,7 +515,7 @@ void FixQEqReax::pre_force(int vflag)
   for (int ii=0;ii<inum;++ii) 
     row[ii] = numneigh[ilist[ii]] + 1;
 
-  const int max_neighbor_size = row.InfNorm();
+  const int max_neighbor_size = row.InfNorm()*2;
   idx.Size(max_neighbor_size);
 
   // ** construct and fill the crs graph
@@ -543,31 +543,31 @@ void FixQEqReax::pre_force(int vflag)
 
   // ** create crs matrix
   Epetra_CrsMatrix A(Copy, graph);
+  Epetra_Vector diag(nodalmap);
 
   // ** create preconditioner with default parameters
   PrecondWrapper_ML prec(world);
   prec.setParameters();
-  // {
-  //   // set coordinate data in ml
-  //   Epetra_MultiVector xt(nodalmap, 3, false);
-  //   double **xt_ptr = xt.Pointers();
+  {
+    // set coordinate data in ml
+    Epetra_MultiVector xt(nodalmap, 3, false);
+    double **xt_ptr = xt.Pointers();
   
-  //   // format requires transpose copy
-  //   util.copyDenseMatrix(3, n, &atom->x[0][0],
-  //                        true, &xt_ptr[0][0]);
-  //   prec.setCoordinates(dim,
-  //                       xt_ptr[0],
-  //                       xt_ptr[1],
-  //                       xt_ptr[2]);
-  // }
+    // format requires transpose copy
+    util.copyDenseMatrix(3, n, &atom->x[0][0],
+                         true, &xt_ptr[0][0]);
+    prec.setCoordinates(dim,
+                        xt_ptr[0],
+                        xt_ptr[1],
+                        xt_ptr[2]);
+  }
 
   // ** fill matrix A
+  Epetra_SerialDenseVector val(max_neighbor_size);
   {
-    Epetra_Vector diag(nodalmap);
     diag.PutScalar(1.0);
-    A.ReplaceDiagonalValues(diag);
+    //A.ReplaceDiagonalValues(diag);
 
-    Epetra_SerialDenseVector val(max_neighbor_size);
     for (int ii=0;ii<inum;++ii) {
       const int i = ilist[ii];
       if (mask[i] & groupbit) {
@@ -614,6 +614,33 @@ void FixQEqReax::pre_force(int vflag)
     A.FillComplete();
     A.OptimizeStorage();
   }
+  
+  // ** build full matrix (A is upper triangular now)
+  Epetra_CrsMatrix AA(Copy, nodalmap, max_neighbor_size); 
+  {
+    Epetra_CrsMatrix *S;
+    Epetra_RowMatrixTransposer trans(&A);
+    trans.CreateTranspose(true, S, &nodalmap);
+    
+    // merge with A
+    A.ExtractDiagonalCopy(diag);
+    for (int ii=0;ii<inum;++ii) {
+      const int i = ilist[ii];
+      if (mask[i] & groupbit) {
+        int nnz_in_row = 0, nnz = 0;
+        S->ExtractGlobalRowCopy(tag[i], max_neighbor_size - nnz, nnz_in_row, &val[nnz], &idx[nnz]); nnz+= nnz_in_row; 
+        A.ExtractGlobalRowCopy (tag[i], max_neighbor_size - nnz, nnz_in_row, &val[nnz], &idx[nnz]); nnz+= nnz_in_row; 
+        AA.InsertGlobalValues  (tag[i], nnz, &val[0], &idx[0]); 
+      }
+    }
+    delete S;
+
+    AA.FillComplete();
+    AA.OptimizeStorage();
+    
+    // replace diagonal always after fill complete
+    AA.ReplaceDiagonalValues(diag);
+  }
 
   // ** fill rhs and solution vector 
   {
@@ -644,8 +671,8 @@ void FixQEqReax::pre_force(int vflag)
 
   // ** associate matrix
   li_solver.setNodalMap(&nodalmap);
-  li_solver.setMatrix(&A);
-  prec.setMatrix(&A);
+  li_solver.setMatrix(&AA);
+  prec.setMatrix(&AA);
 
   {
     // ** wrap [nlocal x 1] vector for x and b
