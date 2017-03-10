@@ -1,8 +1,7 @@
 SHELL = /bin/sh
 
 # Include the Trilinos export makefiles from needed packages
-TRILINOS_INSTALL_DIR = $(HOME)/Work/lib/trilinos/sph-mumps
-#TRILINOS_INSTALL_DIR = $(HOME)/Work/lib/trilinos/kokkos
+TRILINOS_INSTALL_DIR = $(HOME)/Work/lib/trilinos/implicit-sph/sems
 
 include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Amesos
 include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.AztecOO
@@ -13,7 +12,6 @@ include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Kokkos
 include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.ML
 include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.NOX
 include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Teuchos
-include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Pamgen
 
 # Add the Trilinos installation directory to the search paths
 # for libraries and headers
@@ -49,7 +47,7 @@ SHELL = /bin/sh
 
 CC =		mpicxx
 CCFLAGS =	-g -O3 -march=native \
-                -fdiagnostics-color=auto -std=c++11 \
+                -std=c++11 \
                 -D FFT_NONE -D MPICH_IGNORE_CXX_SEEK \
                 -Wall -Wno-sign-compare \
                 $(INCLUDES) -D HAVE_IMPLICIT_SPH -D DEBUG_VERBOSE -D ERROR_CHECK 
