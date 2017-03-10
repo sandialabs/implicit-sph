@@ -94,7 +94,51 @@ HELP NEEDED. I do not how to work two git repository together. At this moment, l
 use a tar ball version from (http://lammps.sandia.gov/download.html) and install isph 
 code in the ``src`` directory.
 
-2. Copy Makefile.machine to MAKE/Machines directory
+2. Copy Makefile.machine to MAKE/Machines directory. For example, my Makefile.bread has
+   the following modifications:
+```
+# Include the Trilinos export makefiles from needed packages
+TRILINOS_INSTALL_DIR = $(HOME)/Work/lib/trilinos/implicit-sph/sems
+
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Amesos
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.AztecOO
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Belos
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Epetra
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Ifpack
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Kokkos
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.ML
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.NOX
+include $(TRILINOS_INSTALL_DIR)/include/Makefile.export.Teuchos
+
+# Add the Trilinos installation directory to the search paths
+# for libraries and headers
+  LIB_PATH = $(TRILINOS_INSTALL_DIR)/lib
+
+INCLUDES = -I. -I$(TRILINOS_INSTALL_DIR)/include \
+         $(Teuchos_TPL_INCLUDE_DIRS) \
+         $(Ifpack_TPL_INCLUDE_DIRS)
+
+# Add the Trilinos libraries, search path, and rpath to the
+# linker command line arguments
+LIBS =  $(Epetra_SHARED_LIB_RPATH_COMMAND) \
+        $(Amesos_LIBRARIES) \
+        $(AztecOO_LIBRARIES) \
+        $(Belos_LIBRARIES) \
+        $(Epetra_LIBRARIES) \
+        $(Ifpack_LIBRARIES) \
+        $(Kokkos_LIBRARIES) \
+        $(ML_LIBRARIES) \
+        $(NOX_LIBRARIES) \
+        $(Teuchos_LIBRARIES) \
+        $(Pamgen_LIBRARIES) \
+        $(Ifpack_TPL_LIBRARIES) \
+        $(ML_TPL_LIBRARIES) \
+        $(Epetra_TPL_LIBRARIES) \
+        $(Epetra_EXTRA_LD_FLAGS)
+```
+
+You can also see there are some other packages that we do not explicitly turn on. 
+They are dependent packages and it requires to include all.
 
 3. make yes-implicit-sph; make machine -j8
 
